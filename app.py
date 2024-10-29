@@ -73,3 +73,36 @@ def main():
 
 if __name__ == "__main__":
     main()
+# Function to show user dashboard
+@app.route('/dashboard')
+def dashboard():
+    if 'username' in session:
+        return render_template('dashboard.html', username=session['username'])
+    return redirect(url_for('login'))
+
+# Update the main function to include a dashboard link
+def main():
+    initialize_database()  # Ensure the database and tables are created
+
+    # Streamlit UI
+    st.title("Chronic Care Management System")
+    
+    # Authentication
+    menu = ["Login", "Register", "Dashboard"]  # Added Dashboard option
+    choice = st.sidebar.selectbox("Select an option", menu)
+
+    if choice == "Login":
+        # Existing login code...
+    
+    elif choice == "Register":
+        # Existing registration code...
+    
+    elif choice == "Dashboard":
+        if 'username' in session:
+            st.write(f"Welcome to your dashboard, {session['username']}!")
+            # Additional dashboard functionality can be added here.
+        else:
+            st.error("You need to be logged in to access the dashboard.")
+
+if __name__ == "__main__":
+    app.run(debug=True)
