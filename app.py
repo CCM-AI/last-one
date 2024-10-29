@@ -23,6 +23,19 @@ def initialize_database():
     with app.app_context():
         db.create_all()  # Create the database and tables if they don't exist
 
+# Function to check if a user exists
+def user_exists(username):
+    with app.app_context():  # Ensure we're in the app context
+        return User.query.filter_by(username=username).first() is not None
+
+# Function to add a new user
+def add_user(username, password):
+    with app.app_context():  # Ensure we're in the app context
+        hashed_password = generate_password_hash(password, method='sha256')
+        new_user = User(username=username, password=hashed_password)
+        db.session.add(new_user)
+        db.session.commit()
+
 # Streamlit main function
 def main():
     initialize_database()  # Ensure the database and tables are created
@@ -39,25 +52,23 @@ def main():
         password = st.sidebar.text_input("Password", type='password')
         
         if st.sidebar.button("Login"):
-            user = User.query.filter_by(username=username).first()
-            if user and check_password_hash(user.password, password):
-                st.success("Logged in successfully!")
-                # Here you can display more features for logged-in users
-            else:
-                st.error("Invalid username or password.")
+            with app.app_context():  # Ensure we're in the app context
+                user = User.query.filter_by(username=username).first()
+                if user and check_password_hash(user.password, password):
+                    st.success("Logged in successfully!")
+                    # Here you can display more features for logged-in users
+                else:
+                    st.error("Invalid username or password.")
 
     elif choice == "Register":
         new_username = st.sidebar.text_input("New Username")
         new_password = st.sidebar.text_input("New Password", type='password')
         
         if st.sidebar.button("Register"):
-            if User.query.filter_by(username=new_username).first():
+            if user_exists(new_username):
                 st.error("Username already exists.")
             else:
-                hashed_password = generate_password_hash(new_password, method='sha256')
-                new_user = User(username=new_username, password=hashed_password)
-                db.session.add(new_user)
-                db.session.commit()
+                add_user(new_username, new_password)
                 st.success("User registered successfully!")
 
 if __name__ == "__main__":
