@@ -31,7 +31,7 @@ def user_exists(username):
 # Function to add a new user
 def add_user(username, password):
     with app.app_context():  # Ensure we're in the app context
-        hashed_password = generate_password_hash(password, method='sha256')
+        hashed_password = generate_password_hash(password)  # Omit the method to use default
         new_user = User(username=username, password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
